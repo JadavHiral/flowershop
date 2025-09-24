@@ -17,11 +17,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password         = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
 
+    // Basic required fields validation
     if (empty($username) || empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
         $error = "Please fill in all required fields.";
-    } elseif ($password !== $confirm_password) {
+    } 
+    // Password match validation
+    elseif ($password !== $confirm_password) {
         $error = "Passwords do not match.";
-    } else {
+    } 
+    // Phone validation: exactly 10 digits
+    elseif (!empty($phone) && !preg_match('/^\d{10}$/', $phone)) {
+        $error = "Phone number must be exactly 10 digits.";
+    }
+    else {
         // Hash password and simulate saving to DB (session)
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
@@ -120,11 +128,12 @@ button[type="submit"]:hover {
   text-decoration: underline;
 }
 
+/* Error messages aligned left */
 .error {
   color: red;
   font-size: 0.9rem;
   margin-bottom: 15px;
-  text-align: center;
+  text-align: left;
 }
 
 @media (max-width: 576px) {
@@ -163,7 +172,7 @@ button[type="submit"]:hover {
       </div>
 
       <div class="mb-3">
-        <label for="phone" class="form-label">Phone</label>
+        <label for="phone" class="form-label">Phone *</label>
         <input type="text" class="form-control" id="phone" name="phone" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>" />
       </div>
 
@@ -211,6 +220,11 @@ button[type="submit"]:hover {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
 
 <script>
+  // Custom method for phone number validation (exactly 10 digits)
+  $.validator.addMethod("phone10", function(phone_number, element) {
+    return this.optional(element) || /^\d{10}$/.test(phone_number);
+  }, "Please enter exactly 10 digits");
+
   $(document).ready(function () {
     $("#registerForm").validate({
       errorElement: 'div',
@@ -228,6 +242,10 @@ button[type="submit"]:hover {
           required: true,
           email: true
         },
+        phone: {
+          required: true,
+          phone10: true
+        },
         password: {
           required: true,
           minlength: 6
@@ -241,6 +259,7 @@ button[type="submit"]:hover {
         username: "Username must be at least 3 characters",
         name: "Name must be at least 3 characters",
         email: "Please enter a valid email",
+        phone: "Please enter 10 digits only",
         password: {
           required: "Enter your password",
           minlength: "Must be at least 6 characters"
@@ -258,3 +277,4 @@ button[type="submit"]:hover {
 $Content1 = ob_get_clean();
 include 'layout.php';
 ?>
+
