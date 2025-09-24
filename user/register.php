@@ -17,20 +17,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $password         = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
 
-    // Basic required fields validation
-    if (empty($username) || empty($name) || empty($email) || empty($password) || empty($confirm_password)) {
+    // Validate required fields
+    if (
+        empty($username) || empty($name) || empty($email) || empty($phone) || empty($city) ||
+        empty($state) || empty($country) || empty($address) || empty($password) || empty($confirm_password)
+    ) {
         $error = "Please fill in all required fields.";
     } 
-    // Password match validation
     elseif ($password !== $confirm_password) {
         $error = "Passwords do not match.";
     } 
-    // Phone validation: exactly 10 digits
-    elseif (!empty($phone) && !preg_match('/^\d{10}$/', $phone)) {
+    elseif (!preg_match('/^\d{10}$/', $phone)) {
         $error = "Phone number must be exactly 10 digits.";
     }
     else {
-        // Hash password and simulate saving to DB (session)
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
         $_SESSION['user'] = [
@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 ?>
 
 <style>
-/* Reusing login page background and layout */
+/* Same styling as before */
 body {
   background: linear-gradient(to right, #e0f7fa, #f8f9fa);
   font-family: 'Segoe UI', sans-serif;
@@ -128,7 +128,6 @@ button[type="submit"]:hover {
   text-decoration: underline;
 }
 
-/* Error messages aligned left */
 .error {
   color: red;
   font-size: 0.9rem;
@@ -172,27 +171,27 @@ button[type="submit"]:hover {
       </div>
 
       <div class="mb-3">
-        <label for="phone" class="form-label">Phone *</label>
+        <label for="phone" class="form-label">PhoneNo *</label>
         <input type="text" class="form-control" id="phone" name="phone" value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>" />
       </div>
 
       <div class="mb-3">
-        <label for="city" class="form-label">City</label>
+        <label for="city" class="form-label">City *</label>
         <input type="text" class="form-control" id="city" name="city" value="<?= htmlspecialchars($_POST['city'] ?? '') ?>" />
       </div>
 
       <div class="mb-3">
-        <label for="state" class="form-label">State</label>
+        <label for="state" class="form-label">State *</label>
         <input type="text" class="form-control" id="state" name="state" value="<?= htmlspecialchars($_POST['state'] ?? '') ?>" />
       </div>
 
       <div class="mb-3">
-        <label for="country" class="form-label">Country</label>
+        <label for="country" class="form-label">Country *</label>
         <input type="text" class="form-control" id="country" name="country" value="<?= htmlspecialchars($_POST['country'] ?? '') ?>" />
       </div>
 
       <div class="mb-3">
-        <label for="address" class="form-label">Address</label>
+        <label for="address" class="form-label">Address *</label>
         <textarea class="form-control" id="address" name="address" rows="3"><?= htmlspecialchars($_POST['address'] ?? '') ?></textarea>
       </div>
 
@@ -215,15 +214,13 @@ button[type="submit"]:hover {
   </div>
 </div>
 
-<!-- jQuery & Validation -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
 
 <script>
-  // Custom method for phone number validation (exactly 10 digits)
-  $.validator.addMethod("phone10", function(phone_number, element) {
+  $.validator.addMethod("phoneno", function(phone_number, element) {
     return this.optional(element) || /^\d{10}$/.test(phone_number);
-  }, "Please enter exactly 10 digits");
+  }, "Please enter only 10 digits");
 
   $(document).ready(function () {
     $("#registerForm").validate({
@@ -246,6 +243,18 @@ button[type="submit"]:hover {
           required: true,
           phone10: true
         },
+        city: {
+          required: true
+        },
+        state: {
+          required: true
+        },
+        country: {
+          required: true
+        },
+        address: {
+          required: true
+        },
         password: {
           required: true,
           minlength: 6
@@ -259,7 +268,11 @@ button[type="submit"]:hover {
         username: "Username must be at least 3 characters",
         name: "Name must be at least 3 characters",
         email: "Please enter a valid email",
-        phone: "Please enter 10 digits only",
+        phone: "Please enter only 10 digits",
+        city: "Please enter your city",
+        state: "Please enter your state",
+        country: "Please enter your country",
+        address: "Please enter your address",
         password: {
           required: "Enter your password",
           minlength: "Must be at least 6 characters"
@@ -277,4 +290,3 @@ button[type="submit"]:hover {
 $Content1 = ob_get_clean();
 include 'layout.php';
 ?>
-
